@@ -1,20 +1,5 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const fetch = require('node-fetch');
-
-const app = express();
-const port = process.env.PORT || 3000;
-
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_API_KEY = process.env.SUPABASE_API_KEY;
-const PRODUCT_ID = process.env.PRODUCT_ID;
-const PLANTING_AREA = process.env.PLANTING_AREA;
-
-app.use(bodyParser.json());
-
 app.post('/shopify-webhook', async (req, res) => {
   const order = req.body;
-
   const amount = order.line_items.reduce((sum, item) => sum + item.quantity, 0);
 
   try {
@@ -34,16 +19,14 @@ app.post('/shopify-webhook', async (req, res) => {
     });
 
     if (!response.ok) {
-      throw new Error(`Supabase Error: ${response.statusText}`);
+      const errorText = await response.text();
+      console.error('Supabase Fehler:', errorText);
+      return res.status(500).send('Fehler beim Speichern: ' + errorText);
     }
 
     res.status(200).send('Order saved to Supabase');
   } catch (error) {
-    console.error('Fehler beim Speichern:', error);
-    res.status(500).send('Fehler beim Speichern');
+    console.error('Fetch Fehler:', error);
+    res.status(500).send('Fehler beim Speichern: ' + error.message);
   }
-});
-
-app.listen(port, () => {
-  console.log(`Webhook-Server läuft auf Port ${port}`);
 });
