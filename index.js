@@ -33,6 +33,10 @@ app.post('/shopify-webhook', async (req, res) => {
       })
     });
 
+    if (!response.ok) {
+      throw new Error(`Supabase Error: ${response.statusText}`);
+    }
+
     res.status(200).send('Order saved to Supabase');
   } catch (error) {
     console.error('Fehler beim Speichern:', error);
@@ -41,4 +45,5 @@ app.post('/shopify-webhook', async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Webhook-Server läuft auf Port ${
+  console.log(`Webhook-Server läuft auf Port ${port}`);
+});
