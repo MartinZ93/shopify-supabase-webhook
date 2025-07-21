@@ -28,11 +28,14 @@ app.post('/shopify-webhook', async (req, res) => {
         'Content-Type': 'application/json',
         Prefer: 'return=minimal'
       },
-      body: JSON.stringify({
-        shopify_order_id: order.id?.toString() || 'unknown',
-        customer_id: order.customer?.id?.toString() || 'unknown',
-        created_at: new Date().toISOString(),
-        order_raw: order
+   body: JSON.stringify({
+  shopify_order_id: order.id?.toString() || 'unknown',
+  customer_id: order.customer?.id?.toString() || 'unknown',
+  product_name: order.line_items?.[0]?.title || 'unknown',
+  created_at: new Date().toISOString(),
+  order_raw: order
+})
+
       })
     });
 
