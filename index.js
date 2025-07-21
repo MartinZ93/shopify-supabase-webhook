@@ -5,23 +5,28 @@ const fetch = require('node-fetch');
 const app = express();
 const port = process.env.PORT || 3000;
 
-const SUPABASE_URL = process.env.SUPABASE_URL;  // ohne /rest/v1 — das hängst du im Code an!
-const SUPABASE_API_KEY = process.env.SUPABASE_API_KEY;
+// Deine Railway Environment-Variablen — KEINE harten Keys im Code!
+const SUPABASE_URL = process.env.SUPABASE_URL;   // https://zxveazzlbyyxqjrsczut.supabase.co/rest/v1
+const SUPABASE_API_KEY = process.env.SUPABASE_API_KEY;  // Service Role Key von Supabase
 
 app.use(bodyParser.json());
 
+app.get('/', (req, res) => {
+  res.send('Webhook-Server läuft!');
+});
+
 app.post('/shopify-webhook', async (req, res) => {
   const order = req.body;
-  console.log('Neue Bestellung:', JSON.stringify(order, null, 2));
+  console.log('Neue Bestellung empfangen:', JSON.stringify(order, null, 2));
 
   try {
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/orders`, {
+    const response = await fetch(`${SUPABASE_URL}/orders`, {
       method: 'POST',
       headers: {
-        'apikey': SUPABASE_API_KEY,
-        'Authorization': `Bearer ${SUPABASE_API_KEY}`,
+        apikey: SUPABASE_API_KEY,
+        Authorization: `Bearer ${SUPABASE_API_KEY}`,
         'Content-Type': 'application/json',
-        'Prefer': 'return=representation'
+        Prefer: 'return=minimal'
       },
       body: JSON.stringify({
         shopify_order_id: order.id?.toString() || 'unknown',
@@ -34,10 +39,10 @@ app.post('/shopify-webhook', async (req, res) => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('Supabase Fehler:', errorText);
-      return res.status(500).send('Fehler bei Supabase');
+      return res.status(500).send('Supabase-Fehler');
     }
 
-    console.log('Erfolgreich in Supabase gespeichert');
+    console.log('Bestellung erfolgreich gespeichert.');
     res.status(200).send('OK');
   } catch (err) {
     console.error('Serverfehler:', err);
