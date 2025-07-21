@@ -5,15 +5,21 @@ const fetch = require('node-fetch');
 const app = express();
 const port = process.env.PORT || 3000;
 
-const SUPABASE_URL = process.env.SUPABASE_URL; // z.B. https://deinprojekt.supabase.co/rest/v1
-const SUPABASE_API_KEY = process.env.SUPABASE_API_KEY; // Dein Service Role Key
+const SUPABASE_URL = process.env.SUPABASE_URL;  // z.B. https://deinprojekt.supabase.co/rest/v1
+const SUPABASE_API_KEY = process.env.SUPABASE_API_KEY;  // Service Role Key
 
 app.use(bodyParser.json());
+
+app.get('/', (req, res) => {
+  res.send('Webhook-Server läuft!');
+});
 
 app.post('/shopify-webhook', async (req, res) => {
   const order = req.body;
 
   console.log('Neue Bestellung empfangen:', JSON.stringify(order, null, 2));
+
+  const productName = order.line_items?.[0]?.title || 'unknown';
 
   try {
     const response = await fetch(`${SUPABASE_URL}/orders`, {
@@ -25,7 +31,8 @@ app.post('/shopify-webhook', async (req, res) => {
       },
       body: JSON.stringify({
         shopify_order_id: order.id?.toString() || 'unknown',
-        customer_id: order.customer?.id?.toString() || null,
+        customer_id: order.customer?.id?.toString() || 'unknown',
+        product_name: productName,
         order_raw: order
       })
     });
