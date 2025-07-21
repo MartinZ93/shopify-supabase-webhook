@@ -5,7 +5,7 @@ const fetch = require('node-fetch');
 const app = express();
 const port = process.env.PORT || 3000;
 
-const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_URL = process.env.SUPABASE_URL; // z.B. https://zxveazzlbyyxqjrsczut.supabase.co/rest/v1
 const SUPABASE_API_KEY = process.env.SUPABASE_API_KEY;
 
 app.use(bodyParser.json());
@@ -31,18 +31,4 @@ app.post('/shopify-webhook', async (req, res) => {
       })
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Fehler bei Supabase:', errorText);
-      return res.status(500).send('Supabase-Fehler');
-    }
-
-    console.log('Bestellung erfolgreich gespeichert.');
-    res.status(200).send('OK');
-  } catch (err) {
-    console.error('Fehler beim Speichern:', err);
-    res.status(500).send('Serverfehler');
-  }
-});
-
-app.listen(
+    if (!response.ok
